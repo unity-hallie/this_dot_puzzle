@@ -13,6 +13,12 @@ export interface Puzzle {
   hidden_vars?: HiddenVars[]
   code: string
   language?: 'javascript' | 'typescript'
+
+  // Learning design metadata
+  teaches?: string[]
+  requires?: string[]
+  difficulty?: 1 | 2 | 3 | 4 | 5
+  learning_notes?: string
 }
 
 export interface ParsedLine {
