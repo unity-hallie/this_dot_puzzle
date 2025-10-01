@@ -370,6 +370,9 @@ function App() {
                         </div>
                       )
                     })}
+                    {testLine && (
+                      <div className={styles.testSyntax}>{testLine}</div>
+                    )}
                   </div>
                   <textarea
                     className={styles.codeInput}
