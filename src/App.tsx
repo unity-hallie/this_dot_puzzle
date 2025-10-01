@@ -273,6 +273,7 @@ function App() {
   // Main Menu View
   if (view === 'menu') {
     return (
+      <>
       <div className={`${styles.app} ${isTransitioning ? styles.transitioning : ''}`}>
         <div className={styles.menuContainer}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -331,6 +332,10 @@ function App() {
           </div>
         </div>
       </div>
+      {/* AI Modals - render at root level */}
+      {showAISettings && <AISettings onClose={() => setShowAISettings(false)} />}
+      {showPuzzleGenerator && <PuzzleGenerator onGenerated={handleGeneratedPuzzle} />}
+      </>
     )
   }
 
@@ -583,10 +588,6 @@ function App() {
           </div>
         </>
       )}
-
-      {/* AI Modals */}
-      {showAISettings && <AISettings onClose={() => setShowAISettings(false)} />}
-      {showPuzzleGenerator && <PuzzleGenerator onGenerated={handleGeneratedPuzzle} />}
     </div>
   )
 }
