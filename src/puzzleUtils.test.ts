@@ -57,7 +57,8 @@ this.value === 11 // @test this.value === _____ // goal
 
     expect(result.lockedLines).toHaveLength(2)
     expect(result.mandatoryLines).toHaveLength(1)
-    expect(result.availableLines).toHaveLength(2)
+    // includes two code lines plus the @test line exposed as available
+    expect(result.availableLines).toHaveLength(3)
     expect(result.testLine).toBe('this.value === 11')
   })
 

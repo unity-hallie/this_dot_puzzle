@@ -37,6 +37,8 @@ export function parsePuzzleCode(code: string) {
         testLine = match[1].trim()
         testDisplay = match[2].trim()
       }
+      // Expose test line as an available item so it can be freely placed
+      availableLines.push(line.trim())
     } else if (line.includes('// @locked')) {
       const content = line.replace(/\s*\/\/ @locked.*$/, '').trim()
       lockedLines.push({ content, type: 'locked', originalPosition: position })

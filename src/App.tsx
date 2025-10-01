@@ -418,6 +418,7 @@ function App() {
                 {allAvailableLines.map((line, i) => {
                   const isMandatory = mandatoryLines.includes(line)
                   const isUsed = solution.some(s => s.content === line && !s.isLocked)
+                  const isTest = line.includes('@test')
                   return (
                     <div
                       key={i}
@@ -427,6 +428,7 @@ function App() {
                       onDragEnd={clearDragState}
                       onClick={() => !isUsed && addLine(line)}
                     >
+                      {isTest && <span className={styles.testBadge}>test</span>}
                       {isMandatory && <span className={styles.requiredBadge}>!</span>}
                       {line}
                     </div>
@@ -469,6 +471,9 @@ function App() {
                             <span className={line.isLocked ? styles.lockedLineNum : styles.solutionLineNum}>
                               {i + 1}
                             </span>
+                            {line.content.includes('@test') && (
+                              <span className={styles.testBadge} style={{ marginRight: 6 }}>test</span>
+                            )}
                             {line.content}
                           </div>
                           {!line.isLocked && (
