@@ -279,6 +279,9 @@ function App() {
                 <h2>{level.title}</h2>
                 <p>{level.description}</p>
                 <span className={styles.puzzleCount}>{completed}/{level.puzzles.length} completed</span>
+                {level.legacy && (
+                  <span className={styles.legacyBadge}>LEGACY</span>
+                )}
               </button>
             )})}
           </div>
@@ -309,6 +312,9 @@ function App() {
                 <p>{clueText}</p>
                 {puzzle.language === 'typescript' && (
                   <span className={styles.tsTag}>TS</span>
+                )}
+                {puzzle.legacy && (
+                  <span className={styles.legacyPuzzleBadge}>LEGACY</span>
                 )}
                 {progress[String(puzzle.id)] && (
                   <span className={styles.doneTag}>✓</span>

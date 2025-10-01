@@ -55,10 +55,10 @@ this.value === 11 // @test this.value === _____ // goal
 
     const result = parsePuzzleCode(code)
 
-    expect(result.lockedLines).toHaveLength(2)
+    expect(result.lockedLines).toHaveLength(3) // 2 locked + 1 test line
     expect(result.mandatoryLines).toHaveLength(1)
-    // includes two code lines plus the @test line exposed as available
-    expect(result.availableLines).toHaveLength(3)
+    // includes two code lines (not the @test line since it's locked)
+    expect(result.availableLines).toHaveLength(2)
     expect(result.testLine).toBe('this.value === 11')
   })
 

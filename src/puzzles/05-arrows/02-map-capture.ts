@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'arrows-2',
   title: 'Carry the Factor',
+  legacy: true,
   hidden_vars: [{
     hint: "triple play",
     vars: {

@@ -10,6 +10,7 @@ Puzzle DSL and Prompt Hints (Weird Operators — Ternary)
 export default {
   id: 'ops-1',
   title: 'Either Or',
+  legacy: true,
   hidden_vars: [{
     hint: "choose with ?",
     vars: {

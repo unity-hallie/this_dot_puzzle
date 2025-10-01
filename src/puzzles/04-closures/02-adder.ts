@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'closures-2',
   title: 'Remember the Number',
+  legacy: true,
   hidden_vars: [{
     hint: "add five",
     vars: {

@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'weird-2',
   title: 'Truth Be Told',
+  legacy: true,
   hidden_vars: [{
     hint: "empty but truthy",
     vars: {

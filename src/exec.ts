@@ -58,6 +58,11 @@ export function executePuzzle({
     const userLines = solutionLines.filter(l => !/\/\/\s*@test/.test(l)).filter(l => l.trim() !== '')
     const usedMandatory = mandatoryLines.every(line => userLines.includes(line))
 
+    // Validate that at least one test assertion exists
+    if (asserts === 0 && !testLine) {
+      return { result: '✗ missing test assertion', success: false, usedMandatory: false, thisContext }
+    }
+
     // Inject hidden variables into scope
     const varDeclarations = Object.entries(hiddenVars)
       .map(([key, value]) => `const ${key} = ${JSON.stringify(value)};`)

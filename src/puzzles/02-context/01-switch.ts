@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: "context-1",
   title: "Context Switch",
+  legacy: true,
   hidden_vars: [{
     hint: "days in a leap year",
     vars: {

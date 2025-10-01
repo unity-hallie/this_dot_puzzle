@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-2',
   title: 'Fallback Only When Empty',
+  legacy: true,
   hidden_vars: [{
     hint: "nullish ??",
     vars: {

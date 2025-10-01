@@ -41,6 +41,7 @@ export interface Level {
   puzzles: Puzzle[]
   learning_objectives?: LearningObjective[]
   designer_notes?: string
+  legacy?: boolean
 }
 
 export const LEVELS: Level[] = [
@@ -89,36 +90,42 @@ Examples in this level:
     id: '02-context',
     title: 'Context',
     description: 'Switch between contexts',
-    puzzles: [context01, context02]
+    puzzles: [context01, context02],
+    legacy: true
   },
   {
     id: '03-types',
     title: 'Types',
     description: 'TypeScript puzzles',
-    puzzles: [types01, types02, types03, types04]
+    puzzles: [types01, types02, types03, types04],
+    legacy: true
   },
   {
     id: '04-closures',
     title: 'Closures',
     description: 'Capture and remember state',
-    puzzles: [closures01, closures02]
+    puzzles: [closures01, closures02],
+    legacy: true
   },
   {
     id: '05-arrows',
     title: 'Arrows',
     description: 'Concise syntax and lexical capture',
-    puzzles: [arrows01, arrows02]
+    puzzles: [arrows01, arrows02],
+    legacy: true
   },
   {
     id: '06-weird',
     title: 'Weird JS',
     description: 'Edge cases and gotchas',
-    puzzles: [weird01, weird02]
+    puzzles: [weird01, weird02],
+    legacy: true
   },
   {
     id: '07-operators',
     title: 'Weird Operators',
     description: 'Ternary, nullish, optional chaining',
-    puzzles: [ops01, ops02, ops03, ops04, ops05, ops06, ops07, ops08]
+    puzzles: [ops01, ops02, ops03, ops04, ops05, ops06, ops07, ops08],
+    legacy: true
   }
 ]

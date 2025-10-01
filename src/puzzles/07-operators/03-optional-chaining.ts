@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-3',
   title: 'Ask Politely',
+  legacy: true,
   hidden_vars: [{
     hint: "optional?",
     vars: {

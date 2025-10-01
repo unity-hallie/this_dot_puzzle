@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'arrows-1',
   title: 'Say It Concise',
+  legacy: true,
   hidden_vars: [{
     hint: "double it",
     vars: {

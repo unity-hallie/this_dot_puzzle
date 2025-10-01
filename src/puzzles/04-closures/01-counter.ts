@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'closures-1',
   title: 'Count Privately',
+  legacy: true,
   hidden_vars: [{
     hint: "third time's the charm",
     vars: {

@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-7',
   title: 'Tiered Choice',
+  legacy: true,
   hidden_vars: [{
     hint: "med label",
     vars: {

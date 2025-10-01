@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-5',
   title: 'Short Circuit',
+  legacy: true,
   hidden_vars: [{
     hint: "and/or",
     vars: {

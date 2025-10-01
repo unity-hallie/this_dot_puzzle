@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-6',
   title: 'Zero Is Legit',
+  legacy: true,
   hidden_vars: [{
     hint: "?? keeps 0",
     vars: {

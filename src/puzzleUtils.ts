@@ -19,6 +19,7 @@ export interface Puzzle {
   requires?: string[]
   difficulty?: 1 | 2 | 3 | 4 | 5
   learning_notes?: string
+  legacy?: boolean
 }
 
 export interface ParsedLine {
@@ -49,8 +50,10 @@ export function parsePuzzleCode(code: string) {
         testLine = match[1].trim()
         testDisplay = match[2].trim()
       }
-      // Expose test line as an available item so it can be freely placed
-      availableLines.push(line.trim())
+      // Test lines are locked and auto-populated in solution
+      const content = line.trim()
+      lockedLines.push({ content, type: 'locked', originalPosition: position })
+      position++
     } else if (line.includes('// @locked')) {
       const content = line.replace(/\s*\/\/ @locked.*$/, '').trim()
       lockedLines.push({ content, type: 'locked', originalPosition: position })

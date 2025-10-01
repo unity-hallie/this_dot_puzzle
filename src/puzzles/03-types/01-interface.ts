@@ -4,6 +4,7 @@ export default {
   id: "types-1",
   title: "Interface",
   language: 'typescript',
+  legacy: true,
   hidden_vars: [{
     hint: "the answer",
     vars: {

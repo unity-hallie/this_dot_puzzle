@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: "context-2",
   title: "Juggle",
+  legacy: true,
   hidden_vars: [{
     hint: "half a hundred",
     vars: {

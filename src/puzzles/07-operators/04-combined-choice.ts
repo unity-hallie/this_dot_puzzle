@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-4',
   title: 'Fallback Strategy',
+  legacy: true,
   hidden_vars: [{
     hint: "chain choices",
     vars: {

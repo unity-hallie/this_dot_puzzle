@@ -40,7 +40,8 @@ this.value === 13 // @test this.value === _____ // a baker's dozen
 ```
 
 Authoring Guidance
-- One concept per puzzle; 2–5 learner lines.
+- BEGINNER:
+  - 1 Concept per puzzle
 - Use `@mandatory` to encourage specific constructs (e.g., `=>`, `map`, `const x: Type = …`).
 - Tests should validate intent and avoid ambiguity.
 - Prefer short and readable lines over clever one-liners.
@@ -49,7 +50,7 @@ Prompting ChatGPT to Generate Puzzles
 - Each puzzle file includes a top-of-file comment block with a compact “prompt” and the DSL rules it uses. If you paste the entire file (or a few puzzle files) into ChatGPT, it will:
   - Infer the format and ask what topics and difficulty you want.
   - Generate new puzzle modules that follow the same markers and structure.
-  - Produce minimal, focused challenges (2–5 lines) with a single clear test.
+  - Produce ,inimal, focused challenges (2–5 lines) with a single clear test.
 
 Suggested Chat Prompt (already embedded in puzzle headers)
 - “You are generating short programming puzzles in this DSL (see markers: @locked, @mandatory, @test). Ask me first which topics (e.g., closures, arrow functions, weird JS, TypeScript generics) and difficulty I want. Then output 3–5 new puzzles as TypeScript modules that export a default object with `id`, `title`, `clue`, `code`, and optional `language: 'typescript'`. Keep the code minimal and make sure each has exactly one `@test` line with a clear learner-facing display.”

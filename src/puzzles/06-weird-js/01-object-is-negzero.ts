@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'weird-1',
   title: 'Zero, But Which?',
+  legacy: true,
   hidden_vars: [{
     hint: "spot the imposter",
     vars: {

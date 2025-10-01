@@ -114,3 +114,66 @@ describe('executePuzzle (fallback single test)', () => {
     expect(res.success).toBe(true)
   })
 })
+
+describe('executePuzzle (test line requirements)', () => {
+  it('should fail when inline test line is not in solution', () => {
+    // User drags code but NOT the test line
+    const solutionLines = [
+      'let x = 5',
+      'x += 8',
+      // Missing: 'x === 13 // @test x === TARGET // the goal'
+    ]
+    const res = executePuzzle({
+      mode: 'puzzle',
+      codeText: '',
+      solutionLines,
+      isTypeScript: false,
+      testLine: '',
+      mandatoryLines: [],
+      clue: 'should not pass',
+      hiddenVars: { TARGET: 13 }
+    })
+    // Should fail because no test line present
+    expect(res.success).toBe(false)
+    expect(res.result).toContain('missing test assertion')
+  })
+
+  it('test line should have access to solution scope', () => {
+    const solutionLines = [
+      'let value = 10',
+      'value += 3',
+      'value === TARGET // @test value === TARGET // goal'
+    ]
+    const res = executePuzzle({
+      mode: 'puzzle',
+      codeText: '',
+      solutionLines,
+      isTypeScript: false,
+      testLine: '',
+      mandatoryLines: [],
+      clue: 'ok',
+      hiddenVars: { TARGET: 13 }
+    })
+    // Test line should see 'value' variable from earlier lines
+    expect(res.success).toBe(true)
+  })
+
+  it('should fail when solution code is wrong even with test line present', () => {
+    const solutionLines = [
+      'let x = 5',
+      'x += 5', // Wrong: should be += 8
+      'x === TARGET // @test x === TARGET // goal'
+    ]
+    const res = executePuzzle({
+      mode: 'puzzle',
+      codeText: '',
+      solutionLines,
+      isTypeScript: false,
+      testLine: '',
+      mandatoryLines: [],
+      clue: 'nope',
+      hiddenVars: { TARGET: 13 }
+    })
+    expect(res.success).toBe(false)
+  })
+})

@@ -4,6 +4,7 @@ export default {
   id: 'types-2',
   title: 'Typed Props',
   language: 'typescript',
+  legacy: true,
   hidden_vars: [{
     hint: "perfect square",
     vars: {

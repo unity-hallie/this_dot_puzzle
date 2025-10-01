@@ -4,6 +4,7 @@ export default {
   id: 'types-4',
   title: 'Shape Matters',
   language: 'typescript',
+  legacy: true,
   hidden_vars: [{
     hint: "inside the box",
     vars: {

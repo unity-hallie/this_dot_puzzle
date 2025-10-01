@@ -3,6 +3,7 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'ops-8',
   title: 'Call If You Can',
+  legacy: true,
   hidden_vars: [{
     hint: "optional() ??",
     vars: {

@@ -4,6 +4,7 @@ export default {
   id: 'types-3',
   title: 'Keep The Type',
   language: 'typescript',
+  legacy: true,
   hidden_vars: [{
     hint: "louder",
     vars: {
