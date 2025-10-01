@@ -13,5 +13,12 @@ export default defineConfig({
       'dist/**',
       '.{idea,git,cache,output,temp}/**',
     ],
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: 'coverage',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/test/**', '**/*.test.*', '**/*.spec.*'],
+    },
   },
 })
