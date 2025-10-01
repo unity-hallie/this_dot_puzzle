@@ -3,10 +3,15 @@ import type { Puzzle } from '../../puzzleUtils'
 export default {
   id: 'weird-1',
   title: 'Zero, But Which?',
-  clue: 'spot the imposter',
+  hidden_vars: [{
+    hint: "spot the imposter",
+    vars: {
+      ZEROS_ARE_EQUAL: false
+    }
+  }],
   code: `
 const res = Object.is(-0, 0)
-res === false // @test res === _____ // spot the imposter
+res === ZEROS_ARE_EQUAL // @test res === _____ // spot the imposter
   `.trim()
 } satisfies Puzzle
 /*

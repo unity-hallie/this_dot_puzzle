@@ -10,12 +10,16 @@ Puzzle DSL and Prompt Hints (Weird Operators — Ternary)
 export default {
   id: 'ops-1',
   title: 'Either Or',
-  clue: 'choose with ?',
+  hidden_vars: [{
+    hint: "choose with ?",
+    vars: {
+      CHOSEN_LABEL: 'high'
+    }
+  }],
   code: `
 let n = 7 // @locked
 let label // @locked
 label = n > 5 ? 'high' : 'low'
-label === 'high' // @test label === '____' // choose with ?
+label === CHOSEN_LABEL // @test label === _____ // choose with ?
   `.trim()
 } satisfies Puzzle
-

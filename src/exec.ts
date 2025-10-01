@@ -8,6 +8,7 @@ export interface ExecuteParams {
   testLine: string
   mandatoryLines: string[]
   clue: string
+  hiddenVars?: Record<string, any>
 }
 
 function prepare(code: string, isTS: boolean): string {
@@ -48,6 +49,7 @@ export function executePuzzle({
   testLine,
   mandatoryLines,
   clue,
+  hiddenVars = {},
 }: ExecuteParams): ExecuteResult {
   const thisContext: any = {}
   try {
@@ -55,9 +57,15 @@ export function executePuzzle({
     const { code: withAsserts, asserts } = transformInlineTests(raw)
     const userLines = solutionLines.filter(l => !/\/\/\s*@test/.test(l)).filter(l => l.trim() !== '')
     const usedMandatory = mandatoryLines.every(line => userLines.includes(line))
+
+    // Inject hidden variables into scope
+    const varDeclarations = Object.entries(hiddenVars)
+      .map(([key, value]) => `const ${key} = ${JSON.stringify(value)};`)
+      .join('\n')
+
     if (asserts > 0) {
       const prelude = 'var __failures=[]; function __assert(c,m){ if(!c) __failures.push(m) }\n'
-      const execCode = prepare(prelude + withAsserts + '\nreturn __failures', isTypeScript)
+      const execCode = prepare(prelude + varDeclarations + '\n' + withAsserts + '\nreturn __failures', isTypeScript)
       const run = new Function('thisContext', '"use strict";\n' + execCode)
       const failures: any[] = run(thisContext)
       if (!usedMandatory) {
@@ -68,7 +76,7 @@ export function executePuzzle({
       }
       return { result: `✗ ${failures[0] ?? 'failed'}`, success: false, usedMandatory, thisContext }
     } else {
-      const execCode = prepare(raw, isTypeScript)
+      const execCode = prepare(varDeclarations + '\n' + raw, isTypeScript)
       const testCode = prepare(testLine, isTypeScript)
       const runAll = new Function('thisContext', '"use strict";\n' + execCode + '\nreturn ( ' + testCode + ' )')
       const success = !!runAll(thisContext)

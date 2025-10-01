@@ -1,20 +1,23 @@
 import type { Puzzle } from '../../puzzleUtils'
 
-/*
-Puzzle DSL and Prompt Hints (Weird Operators — Combined)
-- Combine optional chaining, nullish coalescing, and ternary.
-- ChatGPT: After confirming target topics, produce puzzles with small, clear goals.
-*/
-
 export default {
   id: 'ops-4',
   title: 'Fallback Strategy',
-  clue: 'chain choices',
+  hidden_vars: [{
+    hint: "chain choices",
+    vars: {
+      RUNTIME_MODE: 'debug'
+    }
+  }],
   code: `
 const cfg = { debug: true } // @locked
 let mode // @locked
 mode = cfg.options?.mode ?? (cfg.debug ? 'debug' : 'prod')
-mode === 'debug' // @test mode === '_____'
+mode === RUNTIME_MODE // @test mode === _____ // chain choices
   `.trim()
 } satisfies Puzzle
-
+/*
+Puzzle DSL and Prompt Hints (Combined Operators)
+- Combine ?., ??, and ternary for complex fallback logic.
+- ChatGPT: Create puzzles with multiple operator types working together.
+*/

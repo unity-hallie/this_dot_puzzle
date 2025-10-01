@@ -1,10 +1,16 @@
 // Declare NodeJS-style require to satisfy TypeScript when targeting ESM without @types/node
 declare const require: any
 
+export interface HiddenVars {
+  hint: string
+  vars: Record<string, any>
+}
+
 export interface Puzzle {
   id: string | number
   title?: string
-  clue: string
+  clue?: string  // Legacy - prefer hidden_vars
+  hidden_vars?: HiddenVars[]
   code: string
   language?: 'javascript' | 'typescript'
 }

@@ -36,6 +36,8 @@ export function validateAllPuzzles(): PuzzleFailure[] {
         failures.push({ id: puzzle.id, title: puzzle.title, reason: 'Missing @test line' })
         continue
       }
+      const hiddenVars = puzzle.hidden_vars?.[0]?.vars || {}
+      const clue = puzzle.hidden_vars?.[0]?.hint || puzzle.clue || ''
       const res = executePuzzle({
         mode: 'code',
         codeText,
@@ -43,7 +45,8 @@ export function validateAllPuzzles(): PuzzleFailure[] {
         isTypeScript: isTS,
         testLine,
         mandatoryLines: [],
-        clue: puzzle.clue,
+        clue,
+        hiddenVars,
       })
       if (!res.success) {
         failures.push({ id: puzzle.id, title: puzzle.title, reason: res.result })

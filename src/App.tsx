@@ -229,6 +229,10 @@ function App() {
   const runCode = () => {
     if (!puzzle) return
     const isTypeScript = puzzle.language === 'typescript'
+    // Extract hidden variables and clue
+    const hiddenVars = puzzle.hidden_vars?.[0]?.vars || {}
+    const clue = puzzle.hidden_vars?.[0]?.hint || puzzle.clue || ''
+
     const { result } = executePuzzle({
       mode,
       codeText,
@@ -236,7 +240,8 @@ function App() {
       isTypeScript,
       testLine,
       mandatoryLines,
-      clue: puzzle.clue,
+      clue,
+      hiddenVars,
     })
     setResult(result)
     if (result.startsWith('✓') && puzzle?.id) {
@@ -291,7 +296,9 @@ function App() {
           <h1 className={styles.menuTitle}>{selectedLevel.title}</h1>
           <p className={styles.menuSubtitle}>{selectedLevel.description}</p>
           <div className={styles.puzzleGrid}>
-            {selectedLevel.puzzles.map((puzzle, index) => (
+            {selectedLevel.puzzles.map((puzzle, index) => {
+              const clueText = puzzle.hidden_vars?.[0]?.hint || puzzle.clue || ''
+              return (
               <button
                 key={puzzle.id}
                 className={styles.puzzleCard}
@@ -299,7 +306,7 @@ function App() {
               >
                 <span className={styles.puzzleNumber}>{index + 1}</span>
                 <h3>{puzzle.title}</h3>
-                <p>{puzzle.clue}</p>
+                <p>{clueText}</p>
                 {puzzle.language === 'typescript' && (
                   <span className={styles.tsTag}>TS</span>
                 )}
@@ -307,7 +314,7 @@ function App() {
                   <span className={styles.doneTag}>✓</span>
                 )}
               </button>
-            ))}
+            )})}
           </div>
         </div>
       </div>
@@ -332,9 +339,7 @@ function App() {
         </button>
       </div>
 
-      <div className={styles.clueBox}>
-        <span className={styles.clueLabel}>clue:</span> {puzzle.clue}
-      </div>
+      {/* Clue hidden until success - shown only in result message */}
 
       {mode === 'code' ? (
         <div className={styles.codeMode}>

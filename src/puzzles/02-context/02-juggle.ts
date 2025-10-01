@@ -1,7 +1,14 @@
+import type { Puzzle } from '../../puzzleUtils'
+
 export default {
   id: "context-2",
   title: "Juggle",
-  clue: "half a hundred",
+  hidden_vars: [{
+    hint: "half a hundred",
+    vars: {
+      HALF_HUNDRED: 50
+    }
+  }],
   code: `
 let x = { n: 10 } // @locked
 let y = { n: 20 } // @locked
@@ -12,11 +19,11 @@ this = y
 this.n += 10
 this = z
 this.n += 20
-this.n === 50 // @test this.n === _____ // half a hundred
+this.n === HALF_HUNDRED // @test this.n === _____ // half a hundred
   `.trim()
-}
+} satisfies Puzzle
 /*
-Puzzle DSL and Prompt Hints
-- Keep tests clear and learner-facing.
-- ChatGPT: Confirm target (closures, arrows, weird JS, TS) then output more puzzles with these same markers.
+Puzzle DSL and Prompt Hints (Context Juggling)
+- Multiple \`this =\` switches; track which context receives each change.
+- ChatGPT: Create puzzles with 3+ context switches requiring careful tracking.
 */
