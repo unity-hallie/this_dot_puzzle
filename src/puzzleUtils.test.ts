@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parsePuzzleCode, replaceThisReferences } from './puzzleUtils'
+import { parsePuzzleCode, replaceThisReferences, transpileTypeScript, ensureLockedOrder, type SolutionLine } from './puzzleUtils'
 
 describe('parsePuzzleCode', () => {
   it('should parse locked lines with position', () => {
@@ -104,11 +104,56 @@ describe('replaceThisReferences', () => {
     )
   })
 
+  it('should replace bracket access and ternary', () => {
+    const code = 'this["key"] = this ? 1 : 0'
+    expect(replaceThisReferences(code)).toBe('thisContext["key"] = thisContext ? 1 : 0')
+  })
+
   it('should not replace "this" in strings or comments', () => {
     // Note: This is a known limitation - we don't handle strings/comments specially
     // This test documents current behavior
     const code = 'this.value = 5 // set this'
     const result = replaceThisReferences(code)
     expect(result).toContain('thisContext.value = 5')
+  })
+})
+
+describe('transpileTypeScript', () => {
+  it('transpiles basic TypeScript to JS when compiler available', () => {
+    const code = 'let x: number = 1; x += 1; x'
+    const out = transpileTypeScript(code)
+    // Types are erased; output should not contain ": number"
+    expect(out).not.toContain(': number')
+  })
+
+  it('returns input on failure', () => {
+    const code = 'let y = 2'
+    const out = transpileTypeScript(code)
+    expect(typeof out).toBe('string')
+    expect(out.length).toBeGreaterThan(0)
+  })
+})
+
+describe('ensureLockedOrder', () => {
+  it('keeps already ordered locked lines intact', () => {
+    const lockedContents = ['A', 'B']
+    const lines: SolutionLine[] = [
+      { content: 'A', isLocked: true, isMandatory: false },
+      { content: 'X', isLocked: false, isMandatory: false },
+      { content: 'B', isLocked: true, isMandatory: false },
+    ]
+    const out = ensureLockedOrder(lines, lockedContents)
+    expect(out.map(l => l.content)).toEqual(['A', 'X', 'B'])
+  })
+
+  it('replaces locked lines to match locked order when out of order', () => {
+    const lockedContents = ['A', 'B']
+    const lines: SolutionLine[] = [
+      { content: 'B', isLocked: true, isMandatory: false },
+      { content: 'X', isLocked: false, isMandatory: false },
+      { content: 'A', isLocked: true, isMandatory: false },
+    ]
+    const out = ensureLockedOrder(lines, lockedContents)
+    expect(out.map(l => l.content)).toEqual(['A', 'X', 'B'])
   })
 })

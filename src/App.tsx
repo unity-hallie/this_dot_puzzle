@@ -1,41 +1,17 @@
 import { useState, useEffect } from 'react'
+import type React from 'react'
 import styles from './App.module.css'
-import { parsePuzzleCode, replaceThisReferences, type Puzzle, type SolutionLine } from './puzzleUtils'
+import { parsePuzzleCode, ensureLockedOrder, type Puzzle, type SolutionLine } from './puzzleUtils'
+import { executePuzzle } from './exec'
+import { LEVELS, type Level } from './puzzles'
 
-const PUZZLES: Puzzle[] = [
-  {
-    id: 1,
-    clue: "first two-digit prime",
-    code: `
-let x = { value: 0 } // @locked
-this = x // @locked
-this.value = 5
-this.value += 6
-this.value += 1
-this.value *= 2
-this.value -= 4
-this.value === 11 // @test this.value === _____ // first two-digit prime
-    `.trim()
-  },
-  {
-    id: 2,
-    clue: "lucky number",
-    code: `
-let obj = { count: 0 } // @locked
-this.count = 7 // @mandatory
-this = obj
-this.count += 6
-this.count *= 2
-this.count -= 7
-this.count === 13 // @test this.count === _____ // lucky number
-    `.trim()
-  }
-]
-
+type View = 'menu' | 'level-select' | 'puzzle'
 type Mode = 'puzzle' | 'code'
 
 function App() {
-  const [puzzleIndex, setPuzzleIndex] = useState(0)
+  const [view, setView] = useState<View>('menu')
+  const [selectedLevel, setSelectedLevel] = useState<Level | null>(null)
+  const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle | null>(null)
   const [solution, setSolution] = useState<SolutionLine[]>([])
   const [mode, setMode] = useState<Mode>('puzzle')
   const [codeText, setCodeText] = useState('')
@@ -43,9 +19,20 @@ function App() {
   const [draggedFromSelected, setDraggedFromSelected] = useState<number | null>(null)
   const [draggedFromAvailable, setDraggedFromAvailable] = useState<string | null>(null)
   const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [progress, setProgress] = useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem('this_puzzle_progress_v1')
+      return raw ? JSON.parse(raw) : {}
+    } catch {
+      return {}
+    }
+  })
 
-  const puzzle = PUZZLES[puzzleIndex]
-  const { lockedLines, mandatoryLines, availableLines, testLine, testDisplay } = parsePuzzleCode(puzzle.code)
+  const puzzle = selectedPuzzle
+  const { lockedLines, mandatoryLines, availableLines, testLine, testDisplay } = puzzle
+    ? parsePuzzleCode(puzzle.code)
+    : { lockedLines: [], mandatoryLines: [], availableLines: [], testLine: '', testDisplay: '' }
   const allAvailableLines = [...mandatoryLines, ...availableLines]
 
   // Initialize solution with locked lines when puzzle changes
@@ -59,45 +46,46 @@ function App() {
   }
 
   useEffect(() => {
-    initializeSolution()
-  }, [puzzleIndex])
-
-  // Ensure locked lines maintain relative order
-  const ensureLockedOrder = (lines: SolutionLine[]): SolutionLine[] => {
-    const locked = lines.filter(l => l.isLocked)
-    const lockedContents = lockedLines.map(l => l.content)
-
-    // Check if locked lines are in correct order
-    let lastLockedIndex = -1
-    for (const line of locked) {
-      const expectedIndex = lockedContents.indexOf(line.content)
-      if (expectedIndex <= lastLockedIndex) {
-        // Out of order, need to fix
-        const result: SolutionLine[] = []
-        let lockedIdx = 0
-
-        for (const line of lines) {
-          if (line.isLocked) {
-            // Replace with correct locked line
-            if (lockedIdx < lockedLines.length) {
-              result.push({
-                content: lockedLines[lockedIdx].content,
-                isLocked: true,
-                isMandatory: false
-              })
-              lockedIdx++
-            }
-          } else {
-            result.push(line)
-          }
-        }
-        return result
-      }
-      lastLockedIndex = expectedIndex
+    if (selectedPuzzle) {
+      initializeSolution()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPuzzle])
 
-    return lines
+  const transitionTo = (newView: View, callback?: () => void) => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      if (callback) callback()
+      setView(newView)
+      setTimeout(() => setIsTransitioning(false), 50)
+    }, 200)
   }
+
+  const goToMenu = () => {
+    transitionTo('menu', () => {
+      setSelectedLevel(null)
+      setSelectedPuzzle(null)
+      reset()
+    })
+  }
+
+  const selectLevel = (level: Level) => {
+    transitionTo('level-select', () => {
+      setSelectedLevel(level)
+    })
+  }
+
+  const selectPuzzle = (puzzle: Puzzle) => {
+    transitionTo('puzzle', () => {
+      setSelectedPuzzle(puzzle)
+      reset()
+    })
+  }
+
+  // Helper that applies library ensureLockedOrder using current locked contents
+  const ensureLocked = (lines: SolutionLine[]) => (
+    ensureLockedOrder(lines, lockedLines.map(l => l.content))
+  )
 
   const addLine = (line: string) => {
     const newLine: SolutionLine = {
@@ -130,12 +118,20 @@ function App() {
     setDraggedFromSelected(index)
     setDraggedFromAvailable(null)
     e.dataTransfer.effectAllowed = 'move'
+    try {
+      // Required in some browsers to initiate drag
+      e.dataTransfer.setData('text/plain', solution[index].content)
+    } catch {}
   }
 
   const handleDragStartAvailable = (e: React.DragEvent, line: string) => {
     setDraggedFromAvailable(line)
     setDraggedFromSelected(null)
     e.dataTransfer.effectAllowed = 'copy'
+    try {
+      // Required in some browsers (e.g., Safari/Firefox) to start drag
+      e.dataTransfer.setData('text/plain', line)
+    } catch {}
   }
 
   const handleDragOverSelected = (e: React.DragEvent, index: number) => {
@@ -150,34 +146,36 @@ function App() {
 
   const handleDropOnSelected = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
-    clearDragState()
+    const fromSelected = draggedFromSelected
+    const fromAvailable = draggedFromAvailable
 
-    if (draggedFromSelected !== null) {
+    if (fromSelected !== null) {
       // Reorder within solution
       const newSolution = [...solution]
-      const [draggedLine] = newSolution.splice(draggedFromSelected, 1)
+      const [draggedLine] = newSolution.splice(fromSelected, 1)
       newSolution.splice(dropIndex, 0, draggedLine)
-      setSolution(ensureLockedOrder(newSolution))
-    } else if (draggedFromAvailable !== null) {
+      setSolution(ensureLocked(newSolution))
+    } else if (fromAvailable !== null) {
       // Add from available at position
       const newLine: SolutionLine = {
-        content: draggedFromAvailable,
+        content: fromAvailable,
         isLocked: false,
-        isMandatory: mandatoryLines.includes(draggedFromAvailable)
+        isMandatory: mandatoryLines.includes(fromAvailable)
       }
       const newSolution = [...solution]
       newSolution.splice(dropIndex, 0, newLine)
-      setSolution(ensureLockedOrder(newSolution))
+      setSolution(ensureLocked(newSolution))
     }
+    clearDragState()
   }
 
   const handleDropOnEmpty = (e: React.DragEvent) => {
     e.preventDefault()
-    clearDragState()
-
-    if (draggedFromAvailable !== null) {
-      addLine(draggedFromAvailable)
+    const fromAvailable = draggedFromAvailable
+    if (fromAvailable !== null) {
+      addLine(fromAvailable)
     }
+    clearDragState()
   }
 
   const switchToCodeMode = () => {
@@ -204,7 +202,7 @@ function App() {
       }
     }
 
-    setSolution(ensureLockedOrder(newSolution))
+    setSolution(ensureLocked(newSolution))
     setMode('puzzle')
   }
 
@@ -215,35 +213,39 @@ function App() {
   }
 
   const nextPuzzle = () => {
-    setPuzzleIndex((puzzleIndex + 1) % PUZZLES.length)
-    reset()
+    if (!selectedLevel || !selectedPuzzle) return
+
+    const currentIndex = selectedLevel.puzzles.findIndex(p => p.id === selectedPuzzle.id)
+    const nextIndex = currentIndex + 1
+
+    if (nextIndex < selectedLevel.puzzles.length) {
+      selectPuzzle(selectedLevel.puzzles[nextIndex])
+    } else {
+      // Go back to level select if no more puzzles
+      transitionTo('level-select')
+    }
   }
 
   const runCode = () => {
-    try {
-      let thisContext = {}
-      const fullCode = mode === 'code'
-        ? codeText
-        : solution.map(l => l.content).join('\n')
-
-      const execCode = replaceThisReferences(fullCode)
-      eval(execCode)
-
-      const testCode = replaceThisReferences(testLine)
-      const success = eval(testCode)
-
-      const userLines = solution.filter(l => !l.isLocked).map(l => l.content)
-      const usedMandatory = mandatoryLines.every(line => userLines.includes(line))
-
-      if (!usedMandatory) {
-        setResult(`✗ missing required lines`)
-      } else if (success) {
-        setResult(`✓ ${puzzle.clue}`)
-      } else {
-        setResult(`✗ ${JSON.stringify(thisContext)}`)
+    if (!puzzle) return
+    const isTypeScript = puzzle.language === 'typescript'
+    const { result } = executePuzzle({
+      mode,
+      codeText,
+      solutionLines: solution.map(l => l.content),
+      isTypeScript,
+      testLine,
+      mandatoryLines,
+      clue: puzzle.clue,
+    })
+    setResult(result)
+    if (result.startsWith('✓') && puzzle?.id) {
+      const pid = String(puzzle.id)
+      if (!progress[pid]) {
+        const next = { ...progress, [pid]: true }
+        setProgress(next)
+        try { localStorage.setItem('this_puzzle_progress_v1', JSON.stringify(next)) } catch {}
       }
-    } catch (e: any) {
-      setResult(`error: ${e.message}`)
     }
   }
 
@@ -253,9 +255,74 @@ function App() {
     return styles.solutionItem
   }
 
+  // Main Menu View
+  if (view === 'menu') {
+    return (
+      <div className={`${styles.app} ${isTransitioning ? styles.transitioning : ''}`}>
+        <div className={styles.menuContainer}>
+          <h1 className={styles.menuTitle}>this.puzzle</h1>
+          <p className={styles.menuSubtitle}>Learn JavaScript context through puzzles</p>
+          <div className={styles.levelGrid}>
+            {LEVELS.map((level) => {
+              const completed = level.puzzles.filter(p => progress[String(p.id)]).length
+              return (
+              <button
+                key={level.id}
+                className={styles.levelCard}
+                onClick={() => selectLevel(level)}
+              >
+                <h2>{level.title}</h2>
+                <p>{level.description}</p>
+                <span className={styles.puzzleCount}>{completed}/{level.puzzles.length} completed</span>
+              </button>
+            )})}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Level Select View
+  if (view === 'level-select' && selectedLevel) {
+    return (
+      <div className={`${styles.app} ${isTransitioning ? styles.transitioning : ''}`}>
+        <div className={styles.menuContainer}>
+          <button className={styles.backButton} onClick={goToMenu}>← Back to Levels</button>
+          <h1 className={styles.menuTitle}>{selectedLevel.title}</h1>
+          <p className={styles.menuSubtitle}>{selectedLevel.description}</p>
+          <div className={styles.puzzleGrid}>
+            {selectedLevel.puzzles.map((puzzle, index) => (
+              <button
+                key={puzzle.id}
+                className={styles.puzzleCard}
+                onClick={() => selectPuzzle(puzzle)}
+              >
+                <span className={styles.puzzleNumber}>{index + 1}</span>
+                <h3>{puzzle.title}</h3>
+                <p>{puzzle.clue}</p>
+                {puzzle.language === 'typescript' && (
+                  <span className={styles.tsTag}>TS</span>
+                )}
+                {progress[String(puzzle.id)] && (
+                  <span className={styles.doneTag}>✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Puzzle View
+  if (!puzzle) return null
+
   return (
-    <div className={styles.app}>
+    <div className={`${styles.app} ${isTransitioning ? styles.transitioning : ''}`}>
       <div className={styles.header}>
+        <button className={styles.backButton} onClick={() => transitionTo('level-select')}>
+          ← Back
+        </button>
         <h1>this.puzzle</h1>
         <button
           className={mode === 'code' ? styles.codeToggle : styles.codeToggleInactive}
