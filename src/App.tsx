@@ -4,6 +4,8 @@ import styles from './App.module.css'
 import { parsePuzzleCode, ensureLockedOrder, type Puzzle, type SolutionLine } from './puzzleUtils'
 import { executePuzzle } from './exec'
 import { LEVELS, type Level } from './puzzles'
+import AISettings from './components/AISettings'
+import PuzzleGenerator from './components/PuzzleGenerator'
 
 type View = 'menu' | 'level-select' | 'puzzle'
 type Mode = 'puzzle' | 'code'
@@ -28,6 +30,8 @@ function App() {
       return {}
     }
   })
+  const [showAISettings, setShowAISettings] = useState(false)
+  const [showPuzzleGenerator, setShowPuzzleGenerator] = useState(false)
 
   const puzzle = selectedPuzzle
   const { lockedLines, mandatoryLines, availableLines, testLine, testDisplay } = puzzle
@@ -260,13 +264,53 @@ function App() {
     return styles.solutionItem
   }
 
+  const handleGeneratedPuzzle = (puzzle: Puzzle) => {
+    setShowPuzzleGenerator(false)
+    // Auto-select the generated puzzle
+    selectPuzzle(puzzle)
+  }
+
   // Main Menu View
   if (view === 'menu') {
     return (
       <div className={`${styles.app} ${isTransitioning ? styles.transitioning : ''}`}>
         <div className={styles.menuContainer}>
-          <h1 className={styles.menuTitle}>this.puzzle</h1>
-          <p className={styles.menuSubtitle}>Learn JavaScript context through puzzles</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <div>
+              <h1 className={styles.menuTitle}>this.puzzle</h1>
+              <p className={styles.menuSubtitle}>Learn JavaScript context through puzzles</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={() => setShowPuzzleGenerator(true)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                ✨ Generate Puzzle
+              </button>
+              <button
+                onClick={() => setShowAISettings(true)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                ⚙️ AI Settings
+              </button>
+            </div>
+          </div>
           <div className={styles.levelGrid}>
             {LEVELS.map((level) => {
               const completed = level.puzzles.filter(p => progress[String(p.id)]).length
@@ -539,6 +583,10 @@ function App() {
           </div>
         </>
       )}
+
+      {/* AI Modals */}
+      {showAISettings && <AISettings onClose={() => setShowAISettings(false)} />}
+      {showPuzzleGenerator && <PuzzleGenerator onGenerated={handleGeneratedPuzzle} />}
     </div>
   )
 }
